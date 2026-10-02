@@ -146,9 +146,32 @@ import { INITIAL_PRODUCTS } from './data/initialData';
 
 let isSeeding = false;
 
+const FABRIC_UNSPLASH_FALLBACKS = [
+  'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=600&q=80',
+  'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=600&q=80',
+  'https://images.unsplash.com/photo-1606156133451-b844c860c2aa?auto=format&fit=crop&w=600&q=80',
+  'https://images.unsplash.com/photo-1528459801416-a9e53bbf4e17?auto=format&fit=crop&w=600&q=80',
+  'https://images.unsplash.com/photo-1588850561407-ed78c282e89b?auto=format&fit=crop&w=600&q=80',
+  'https://images.unsplash.com/photo-1618220179428-22790b461013?auto=format&fit=crop&w=600&q=80',
+  'https://images.unsplash.com/photo-1508427953056-b00b8d78ec65?auto=format&fit=crop&w=600&q=80',
+  'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=600&q=80'
+];
+
 // Products Firestore Helpers
 export function normalizeImageUrl(url: any): string {
   if (!url || typeof url !== 'string') return typeof url === 'string' ? url : '';
+  
+  // Safe recovery fallback for local Hollantex images whose folder was deleted by user,
+  // mapping them dynamically to gorgeous, premium high-res Unsplash fabric textures.
+  if (url.includes('/assets/images/hollantex_')) {
+    let hash = 0;
+    for (let i = 0; i < url.length; i++) {
+      hash += url.charCodeAt(i);
+    }
+    const index = hash % FABRIC_UNSPLASH_FALLBACKS.length;
+    return FABRIC_UNSPLASH_FALLBACKS[index];
+  }
+
   if (url.startsWith('/src/assets/')) {
     return url.replace(/^\/src\/assets\//, '/assets/');
   }
