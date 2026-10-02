@@ -1,4 +1,4 @@
-import { normalizeImageUrl } from '../firebase';
+import { normalizeImageUrl } from '../services/catalogService';
 
 /**
  * Resolves a product image URL, ensuring it is correctly formatted and normalized.

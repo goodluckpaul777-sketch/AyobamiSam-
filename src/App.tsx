@@ -15,15 +15,15 @@ import {
 } from './data/initialData';
 import {
   subscribeToProducts,
-  saveProductToFirestore,
-  deleteProductFromFirestore,
+  saveProductToDatabase,
+  deleteProductFromDatabase,
   subscribeToSettings,
-  saveSettingsToFirestore,
+  saveSettingsToDatabase,
   subscribeToInquiries,
-  saveInquiryToFirestore,
+  saveInquiryToDatabase,
   subscribeToQuotaExceeded,
   normalizeImageUrl,
-} from './firebase';
+} from './services/catalogService';
 import { Header } from './components/Header';
 import { Hero } from './components/Hero';
 import { CategoryGrid } from './components/CategoryGrid';
@@ -53,7 +53,7 @@ function safeSetLocalStorage(key: string, data: any) {
   try {
     localStorage.setItem(key, JSON.stringify(data));
   } catch (err) {
-    console.warn(`LocalStorage quota reached for key ${key}. Full image data preserved in memory and Firestore.`);
+    console.warn(`LocalStorage quota reached for key ${key}. Full image data preserved in memory and database.`);
   }
 }
 
@@ -201,7 +201,7 @@ export default function App() {
     return () => unsubQuota();
   }, []);
 
-  // Sync to localStorage safely with quota fallback (Firestore is primary cloud storage)
+  // Sync to localStorage safely with quota fallback
   useEffect(() => {
     safeSetLocalStorage(STORAGE_KEYS.PRODUCTS, products);
   }, [products]);
@@ -218,7 +218,7 @@ export default function App() {
     safeSetLocalStorage(STORAGE_KEYS.ORDERS, inquiries);
   }, [inquiries]);
 
-  // Live Firebase Real-time listeners for all store visitors
+  // Live real-time catalog listeners for all store visitors
   useEffect(() => {
     const unsubProducts = subscribeToProducts((liveProducts) => {
       if (Array.isArray(liveProducts)) {
@@ -310,7 +310,7 @@ export default function App() {
     };
 
     setInquiries(prev => [newInquiry, ...prev]);
-    saveInquiryToFirestore(newInquiry).catch(console.error);
+    saveInquiryToDatabase(newInquiry).catch(console.error);
   };
 
   // Product Filter with Automatic Code Assignment, Code Priority Sorting & 10-Item Pagination
@@ -932,7 +932,7 @@ export default function App() {
             safeSetLocalStorage(STORAGE_KEYS.PRODUCTS, updated);
             return updated;
           });
-          saveProductToFirestore(prod).catch(console.error);
+          saveProductToDatabase(prod).catch(console.error);
         }}
         onDeleteProduct={(id) => {
           setProducts(prev => {
@@ -940,17 +940,17 @@ export default function App() {
             safeSetLocalStorage(STORAGE_KEYS.PRODUCTS, updated);
             return updated;
           });
-          deleteProductFromFirestore(id).catch(console.error);
+          deleteProductFromDatabase(id).catch(console.error);
         }}
         onUpdateSettings={(newSettings) => {
           setSettings(newSettings);
-          saveSettingsToFirestore(newSettings).catch(console.error);
+          saveSettingsToDatabase(newSettings).catch(console.error);
         }}
         onUpdateInquiryStatus={(inqId, status) => {
           setInquiries(prev => {
             const updated = prev.map(inq => inq.id === inqId ? { ...inq, status } : inq);
             const target = updated.find(i => i.id === inqId);
-            if (target) saveInquiryToFirestore(target).catch(console.error);
+            if (target) saveInquiryToDatabase(target).catch(console.error);
             return updated;
           });
         }}

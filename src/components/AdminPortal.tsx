@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { FabricProduct, StoreSettings, InquiryRecord, MainSectionType, SectionCategoryInfo } from '../types';
 import { MAIN_SECTIONS, OFFICIAL_LOGO_URL } from '../data/initialData';
 import { compressImage } from '../utils/imageCompressor';
-import { syncAllProductsToFirestore } from '../firebase';
+import { syncAllProductsToDatabase } from '../services/catalogService';
 import { safeOpenUrl } from '../utils/formatters';
 import { 
   Plus, Edit, Trash2, Package, Truck, Settings, ShoppingBag, 
@@ -109,8 +109,8 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   const handleSyncAllToCloud = async () => {
     setIsSyncing(true);
     try {
-      const count = await syncAllProductsToFirestore(products);
-      setSaveSuccessMsg(`Successfully pushed ${count} products & custom images to live Firebase Cloud! Your hosted website on Vercel will now show these images.`);
+      const count = await syncAllProductsToDatabase(products);
+      setSaveSuccessMsg(`Successfully pushed ${count} products & custom images to live cloud storage! Your hosted website on Vercel will now show these items.`);
       setTimeout(() => setSaveSuccessMsg(''), 7000);
     } catch (err) {
       setSaveSuccessMsg('Error syncing to cloud: ' + String(err));
@@ -493,7 +493,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
           <div className="flex items-center gap-3">
             <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-950/80 text-emerald-300 border border-emerald-500/40">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              Live Firebase Cloud Sync
+              Live Cloud Sync
             </span>
             <button
               onClick={handleExitPortal}
@@ -655,7 +655,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                 <div className="bg-white p-6 rounded-2xl border-2 border-emerald-600/20 shadow-sm flex items-center justify-between">
                   <div>
                     <span className="text-xs font-black uppercase text-emerald-600 block tracking-wider">Cloud Database</span>
-                    <h3 className="text-2xl font-black text-emerald-900 mt-1">Firebase Live</h3>
+                    <h3 className="text-2xl font-black text-emerald-900 mt-1">Database Connected</h3>
                     <p className="text-xs text-gray-500 font-semibold mt-0.5">Real-time sync to all devices</p>
                   </div>
                   <div className="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-black">
@@ -1627,7 +1627,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                 Are you sure you want to delete <span className="font-black text-gray-900">"{deleteConfirmProduct.name}"</span>?
               </p>
               <p className="text-[11px] text-red-600 font-bold mt-1">
-                This item will be permanently removed from your storefront and Firebase database.
+                This item will be permanently removed from your storefront and database.
               </p>
             </div>
             <div className="flex items-center gap-3 pt-2">
