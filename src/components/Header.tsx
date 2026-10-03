@@ -61,6 +61,12 @@ export const Header: React.FC<HeaderProps> = ({
                   src={logoSrc}
                   alt="Ayobami SAM Ventures Official Logo"
                   className="w-10 h-10 sm:w-14 sm:h-14 object-contain drop-shadow-sm group-hover:scale-105 transition-transform duration-300"
+                  onError={(e) => {
+                    const target = e.currentTarget;
+                    if (!target.src.includes('hero-logo.png')) {
+                      target.src = '/hero-logo.png';
+                    }
+                  }}
                 />
               )}
             </div>
@@ -75,30 +81,48 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           </div>
 
-          {/* Desktop Search Bar */}
-          <div className="hidden lg:flex flex-1 max-w-md mx-6">
-            <div className="relative w-full">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search Design Code (e.g. 019004-1), Lace, Shoes..."
-                className="w-full pl-10 pr-16 py-2.5 rounded-2xl border-2 border-[#E8E2D9] bg-[#FAF8F5] text-sm text-[#0F2E22] placeholder-gray-400 focus:outline-none focus:border-[#0F2E22] focus:bg-white transition-all font-semibold"
-              />
-              <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-              {searchQuery ? (
-                <button
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 px-1.5 py-0.5 rounded font-bold"
-                >
-                  ✕
-                </button>
-              ) : (
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-black uppercase text-[#D4AF37] bg-[#0F2E22] px-2 py-0.5 rounded-md pointer-events-none">
-                  Code Search
-                </span>
-              )}
-            </div>
+          {/* Desktop Search Bar with Larger, Prominent Search Button */}
+          <div className="hidden lg:flex flex-1 max-w-lg mx-4 xl:mx-6">
+            <form 
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (searchQuery.trim()) {
+                  setActiveTab('catalog');
+                }
+              }}
+              className="relative w-full flex items-center gap-2"
+            >
+              <div className="relative flex-1 flex items-center">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search Design Code (e.g. 019004-1), Lace, Shoes..."
+                  className="w-full pl-11 pr-10 py-3 rounded-2xl border-2 border-[#E8E2D9] bg-[#FAF8F5] text-sm text-[#0F2E22] placeholder-gray-400 focus:outline-none focus:border-[#0F2E22] focus:bg-white transition-all font-semibold shadow-xs"
+                />
+                <Search className="w-5 h-5 text-[#0F2E22]/60 absolute left-3.5 pointer-events-none" />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-3 text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 w-5 h-5 rounded-full flex items-center justify-center font-black transition-all cursor-pointer"
+                    title="Clear search"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+
+              {/* Bigger, High-Contrast Search Action Button */}
+              <button
+                type="submit"
+                className="px-5 py-3 rounded-2xl bg-[#0F2E22] hover:bg-[#1B4332] active:bg-[#081B14] text-[#D4AF37] border-2 border-[#D4AF37]/60 font-black text-sm flex items-center gap-2 shadow-md hover:scale-[1.03] active:scale-95 transition-all cursor-pointer whitespace-nowrap shrink-0"
+                title="Search Store"
+              >
+                <Search className="w-5 h-5 text-[#D4AF37]" />
+                <span>Search</span>
+              </button>
+            </form>
           </div>
 
           {/* Right Header Controls (Inquiry Bag & Admin Portal) */}
@@ -141,30 +165,46 @@ export const Header: React.FC<HeaderProps> = ({
 
         </div>
 
-        {/* Mobile Search Bar (Always visible on mobile) */}
+        {/* Mobile Search Bar (Always visible on mobile with prominent Search button) */}
         <div className="lg:hidden pb-3 px-1">
-          <div className="relative w-full">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search Design Code (e.g. 019004-1)..."
-              className="w-full pl-9 pr-24 py-2 rounded-xl border border-gray-300 bg-[#FAF8F5] text-xs font-semibold text-[#0F2E22] placeholder-gray-400 focus:outline-none focus:border-[#0F2E22]"
-            />
-            <Search className="w-3.5 h-3.5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-            {searchQuery ? (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] bg-gray-200 text-gray-700 px-1.5 py-0.5 rounded font-black"
-              >
-                ✕
-              </button>
-            ) : (
-              <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] font-black uppercase text-[#D4AF37] bg-[#0F2E22] px-1.5 py-0.5 rounded">
-                Code Search
-              </span>
-            )}
-          </div>
+          <form 
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (searchQuery.trim()) {
+                setActiveTab('catalog');
+              }
+            }} 
+            className="flex items-center gap-2 w-full"
+          >
+            <div className="relative flex-1">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search Design Code (e.g. 019004-1)..."
+                className="w-full pl-10 pr-9 py-2.5 rounded-xl border-2 border-[#E8E2D9] bg-[#FAF8F5] text-xs font-semibold text-[#0F2E22] placeholder-gray-400 focus:outline-none focus:border-[#0F2E22] shadow-xs"
+              />
+              <Search className="w-4.5 h-4.5 text-[#0F2E22]/60 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 w-5 h-5 rounded-full flex items-center justify-center font-black"
+                  title="Clear search"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+
+            <button
+              type="submit"
+              className="px-4 py-2.5 rounded-xl bg-[#0F2E22] active:bg-[#1B4332] text-[#D4AF37] font-black text-xs border border-[#D4AF37]/50 flex items-center gap-1.5 shadow-sm shrink-0 cursor-pointer"
+            >
+              <Search className="w-4 h-4 text-[#D4AF37]" />
+              <span>Search</span>
+            </button>
+          </form>
         </div>
 
         {/* 3 Core Main Section Navigation Tabs (Desktop) */}
@@ -246,16 +286,33 @@ export const Header: React.FC<HeaderProps> = ({
       {mobileMenuOpen && (
         <div className="lg:hidden bg-[#FAF8F5] border-t-2 border-[#D4AF37] px-5 py-6 shadow-2xl space-y-4 animate-fadeIn">
           
-          <div className="relative w-full mb-3">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search Cloths, Shoes, Machines..."
-              className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-gray-300 text-xs font-semibold"
-            />
-            <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-          </div>
+          <form 
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (searchQuery.trim()) {
+                handleNavClick('catalog', 'all');
+              }
+            }} 
+            className="flex items-center gap-2 w-full mb-3"
+          >
+            <div className="relative flex-1">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search Cloths, Shoes, Machines..."
+                className="w-full pl-10 pr-3 py-3 rounded-xl border-2 border-gray-300 text-xs font-semibold text-[#0F2E22] bg-white focus:outline-none focus:border-[#0F2E22]"
+              />
+              <Search className="w-4.5 h-4.5 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            </div>
+            <button
+              type="submit"
+              className="px-4 py-3 rounded-xl bg-[#0F2E22] text-[#D4AF37] font-black text-xs border border-[#D4AF37]/50 flex items-center gap-1.5 shrink-0 shadow cursor-pointer"
+            >
+              <Search className="w-4 h-4" />
+              <span>Search</span>
+            </button>
+          </form>
 
           <div className="space-y-2 font-black text-sm text-[#0F2E22]">
             

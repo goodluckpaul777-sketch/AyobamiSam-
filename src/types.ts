@@ -17,6 +17,8 @@ export interface FabricProduct {
   isNewArrival: boolean;
   isFeatured: boolean;
   inStock: boolean;
+  isBestseller?: boolean;
+  pricePerYard?: number;
   rating?: number;
   reviewCount?: number;
   suitableFor: string[];

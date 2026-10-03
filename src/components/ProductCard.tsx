@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { FabricProduct, StoreSettings } from '../types';
 import { ImageCarousel } from './ImageCarousel';
+import { safeOpenUrl } from '../utils/formatters';
 import { MessageCircle, Eye, Check, Star, ShieldCheck, Sparkles, Plus, Shirt, Footprints, Scissors } from 'lucide-react';
 
 interface ProductCardProps {
@@ -47,7 +48,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 I want to place an order.`;
 
     const url = `https://wa.me/${settings.whatsapp}?text=${encodeURIComponent(message)}`;
-    window.open(url, '_blank');
+    safeOpenUrl(url);
   };
 
   const getSectionIcon = () => {

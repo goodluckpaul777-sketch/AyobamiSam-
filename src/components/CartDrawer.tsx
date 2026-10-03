@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { InquiryItem, StoreSettings } from '../types';
-import { X, Trash2, Plus, Minus, MessageCircle, ArrowRight, CheckCircle2, ShoppingBag, ShieldCheck } from 'lucide-react';
+import { safeOpenUrl } from '../utils/formatters';
+import { X, Trash2, Plus, Minus, MessageCircle, ArrowRight, CheckCircle2, ShoppingBag, ShieldCheck, AlertCircle } from 'lucide-react';
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -32,6 +33,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
   const [customerNotes, setCustomerNotes] = useState('');
   const [showAdminForm, setShowAdminForm] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [formError, setFormError] = useState('');
 
   const totalItemsCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
@@ -55,15 +57,16 @@ ${itemLines}
 I want to place an order.`;
 
     const url = `https://wa.me/${whatsappNum}?text=${encodeURIComponent(message)}`;
-    window.open(url, '_blank');
+    safeOpenUrl(url);
   };
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!customerName.trim() || !customerPhone.trim()) {
-      alert('Please enter your name and phone number');
+      setFormError('Please enter your name and phone number');
       return;
     }
+    setFormError('');
 
     onSubmitInquiry(customerName, customerPhone, customerState, customerCity, customerNotes);
     setIsSubmitted(true);
@@ -215,6 +218,13 @@ I want to place an order.`;
                     <p className="text-[11px] text-gray-600 font-semibold leading-snug">
                       Enter your Name and Phone Number below to send this inquiry directly into our Admin Portal.
                     </p>
+
+                    {formError && (
+                      <p className="text-xs font-bold text-red-600 bg-red-50 p-2.5 rounded-xl border border-red-200 animate-fadeIn flex items-center gap-1.5">
+                        <AlertCircle className="w-4 h-4 shrink-0" />
+                        <span>{formError}</span>
+                      </p>
+                    )}
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                       <div>

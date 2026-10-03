@@ -29,6 +29,13 @@ export const AboutUsSection: React.FC<AboutUsSectionProps> = ({ settings, onShop
                   src="/shop-location.jpg"
                   alt="Ayobami SAM Ventures Shop Location - Balogun West, Lagos"
                   className="w-full h-48 sm:h-64 object-cover group-hover:scale-105 transition-transform duration-500"
+                  onError={(e) => {
+                    const target = e.currentTarget;
+                    if (!target.src.includes('hero-logo.png')) {
+                      target.src = '/hero-logo.png';
+                      target.className = 'w-full h-48 sm:h-64 object-contain p-8 bg-gray-50 opacity-40';
+                    }
+                  }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex flex-col justify-end p-4 text-left">
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#D4AF37] text-[#0F2E22] text-[10px] font-black uppercase tracking-wider self-start shadow-xs">
@@ -46,6 +53,12 @@ export const AboutUsSection: React.FC<AboutUsSectionProps> = ({ settings, onShop
                     src={logoSrc}
                     alt="Ayobami SAM Ventures Logo"
                     className="w-10 h-10 object-contain"
+                    onError={(e) => {
+                      const target = e.currentTarget;
+                      if (!target.src.includes('hero-logo.png')) {
+                        target.src = '/hero-logo.png';
+                      }
+                    }}
                   />
                 </div>
               </div>

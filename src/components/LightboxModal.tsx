@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
+import { resolveProductImage } from '../utils/fabricImages';
 
 interface LightboxModalProps {
   isOpen: boolean;
@@ -148,13 +149,19 @@ export const LightboxModal: React.FC<LightboxModalProps> = ({
           onClick={toggleZoom}
         >
           <img
-            src={images[currentIndex] || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='}
+            src={images[currentIndex] || '/hero-logo.png'}
             alt={`${productName} view ${currentIndex + 1}`}
             style={{
               transform: `scale(${zoomLevel})`,
               transition: 'transform 0.25s ease-out',
             }}
             className="max-h-[80vh] max-w-[90vw] object-contain rounded-lg shadow-2xl"
+            onError={(e) => {
+              const target = e.currentTarget;
+              if (!target.src.includes('hero-logo.png')) {
+                target.src = '/hero-logo.png';
+              }
+            }}
           />
         </div>
       </div>
@@ -196,7 +203,18 @@ export const LightboxModal: React.FC<LightboxModalProps> = ({
                     : 'border-white/20 opacity-60 hover:opacity-100'
                 }`}
               >
-                <img src={img || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='} alt={`Thumb ${idx + 1}`} className="w-full h-full object-cover" />
+                <img 
+                  src={resolveProductImage(img, productName)} 
+                  alt={`Thumb ${idx + 1}`} 
+                  className="w-full h-full object-cover" 
+                  onError={(e) => {
+                    const target = e.currentTarget;
+                    if (!target.src.includes('hero-logo.png')) {
+                      target.src = '/hero-logo.png';
+                      target.className = 'w-full h-full object-contain p-1 opacity-50';
+                    }
+                  }}
+                />
               </button>
             ))}
           </div>

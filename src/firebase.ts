@@ -116,47 +116,13 @@ export function subscribeToProducts(
       snapshot.forEach((docSnap) => {
         const data = docSnap.data() as FabricProduct;
         const docId = docSnap.id || data.id || '';
-
-        // Purge removed pleasant-ankara products from Firestore
-        if (docId.includes('pleasant-ankara') || (data.name && data.name.toLowerCase().includes('pleasant ankara'))) {
-          deleteProductFromFirestore(docId).catch(console.error);
-          return;
-        }
-
-        // Ensure all shoes & bags products are 2-in-1 matching sets
-        let updatedItem = { ...data, id: docId };
-        if (updatedItem.mainSection === 'shoes' || (updatedItem.categorySlug && updatedItem.categorySlug.includes('shoe'))) {
-          const isOldName = updatedItem.name === 'Handcrafted Italian Leather Native Loafers';
-          const needsUpdate = isOldName || !updatedItem.isMatchingSet || updatedItem.category !== 'Matching Shoe & Bag Set';
-          
-          if (needsUpdate) {
-            updatedItem = {
-              ...updatedItem,
-              name: isOldName ? 'Italian Leather 2-in-1 Matching Shoe & Handbag Set' : updatedItem.name,
-              category: 'Matching Shoe & Bag Set',
-              categorySlug: 'shoe-and-bag',
-              unitLabel: '1 Matching Set (Shoe + Bag)',
-              isMatchingSet: true,
-              fabricType: isOldName ? '100% Genuine Italian Calfskin Leather with Matching Clutch' : updatedItem.fabricType,
-            };
-            saveProductToFirestore(updatedItem).catch(console.error);
-          }
-        }
-
-        prods.push(updatedItem);
+        prods.push({ ...data, id: docId });
       });
 
-      if (prods.length === 0 && !isSeeding && INITIAL_PRODUCTS.length > 0) {
-        isSeeding = true;
-        console.info('Auto-seeding Firestore database with initial starter products...');
-        Promise.all(INITIAL_PRODUCTS.map((p) => saveProductToFirestore(p)))
-          .catch(console.error)
-          .finally(() => {
-            isSeeding = false;
-          });
-        onUpdate(INITIAL_PRODUCTS);
-      } else {
+      if (prods.length > 0) {
         onUpdate(prods);
+      } else {
+        onUpdate(INITIAL_PRODUCTS);
       }
     },
     (err) => {

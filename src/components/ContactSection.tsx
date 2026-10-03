@@ -78,7 +78,18 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ settings }) => {
               className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-[#B07D38] text-white flex items-center justify-center hover:scale-110 active:scale-95 transition-transform shadow-md group shrink-0 cursor-pointer relative overflow-hidden"
               aria-label="Store Location & Balogun Market Address"
             >
-              <img src="/shop-location.jpg" alt="Shop" className="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:opacity-20 transition-opacity" />
+              <img 
+                src="/shop-location.jpg" 
+                alt="Shop" 
+                className="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:opacity-20 transition-opacity" 
+                onError={(e) => {
+                  const target = e.currentTarget;
+                  if (!target.src.includes('hero-logo.png')) {
+                    target.src = '/hero-logo.png';
+                    target.className = 'absolute inset-0 w-8 h-8 object-contain m-auto opacity-40';
+                  }
+                }}
+              />
               <MapPin className="w-6 h-6 sm:w-7 sm:h-7 relative z-10 group-hover:rotate-6 transition-transform text-white drop-shadow" />
             </button>
 
@@ -130,6 +141,13 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ settings }) => {
                 src="/shop-location.jpg"
                 alt="Ayobami SAM Ventures Shop Location in Balogun Market, Lagos"
                 className="w-full h-64 sm:h-72 object-cover"
+                onError={(e) => {
+                  const target = e.currentTarget;
+                  if (!target.src.includes('hero-logo.png')) {
+                    target.src = '/hero-logo.png';
+                    target.className = 'w-full h-64 sm:h-72 object-contain p-12 bg-gray-50 opacity-40';
+                  }
+                }}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex flex-col justify-end p-5">
                 <div className="flex items-center gap-2 mb-1">
@@ -148,7 +166,17 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ settings }) => {
 
               {/* Floating Logo Badge */}
               <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-md p-2 rounded-2xl shadow-lg border border-white">
-                <img src={logoSrc} alt="ASV Logo" className="w-10 h-10 object-contain" />
+                <img 
+                  src={logoSrc} 
+                  alt="ASV Logo" 
+                  className="w-10 h-10 object-contain" 
+                  onError={(e) => {
+                    const target = e.currentTarget;
+                    if (!target.src.includes('hero-logo.png')) {
+                      target.src = '/hero-logo.png';
+                    }
+                  }}
+                />
               </div>
             </div>
 

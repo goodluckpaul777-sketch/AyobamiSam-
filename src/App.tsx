@@ -22,6 +22,13 @@ import {
   subscribeToInquiries,
   saveInquiryToFirestore,
 } from './firebase';
+import {
+  fetchProductsFromServer,
+  saveProductToServer,
+  deleteProductFromServer,
+  saveSettingsToServer,
+  subscribeToLiveSync,
+} from './services/api';
 import { Header } from './components/Header';
 import { Hero } from './components/Hero';
 import { CategoryGrid } from './components/CategoryGrid';
@@ -40,7 +47,7 @@ import { Footer } from './components/Footer';
 import { MessageCircle, Sparkles, Filter, SlidersHorizontal, Shirt, Footprints, Scissors, Search, Shield, ShoppingBag, Palette, ArrowLeft, ChevronLeft, ChevronRight, Layers } from 'lucide-react';
 
 const STORAGE_KEYS = {
-  PRODUCTS: 'asv_products_v5_real_imported_media',
+  PRODUCTS: 'asv_products_v6_pleasant_ankara',
   SETTINGS: 'asv_settings_v3_luxury',
   CART: 'asv_inquiry_cart_v3',
   ORDERS: 'asv_inquiries_v3',
@@ -82,22 +89,9 @@ export default function App() {
       const saved = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
       if (saved) {
         const parsed: FabricProduct[] = JSON.parse(saved);
-        const filtered = parsed.filter(p => !p.id.includes('pleasant-ankara') && !(p.name && p.name.toLowerCase().includes('pleasant ankara')));
-        return filtered.map(p => {
-          if (p.mainSection === 'shoes' || (p.categorySlug && p.categorySlug.includes('shoe'))) {
-            const isOldName = p.name === 'Handcrafted Italian Leather Native Loafers';
-            return {
-              ...p,
-              name: isOldName ? 'Italian Leather 2-in-1 Matching Shoe & Handbag Set' : p.name,
-              category: 'Matching Shoe & Bag Set',
-              categorySlug: 'shoe-and-bag',
-              unitLabel: '1 Matching Set (Shoe + Bag)',
-              isMatchingSet: true,
-              fabricType: isOldName ? '100% Genuine Italian Calfskin Leather with Matching Clutch' : p.fabricType,
-            };
-          }
-          return p;
-        });
+        if (Array.isArray(parsed) && parsed.length >= INITIAL_PRODUCTS.length) {
+          return parsed;
+        }
       }
       return INITIAL_PRODUCTS;
     } catch {
@@ -201,10 +195,32 @@ export default function App() {
     safeSetLocalStorage(STORAGE_KEYS.ORDERS, inquiries);
   }, [inquiries]);
 
-  // Live Firebase Real-time listeners for all store visitors
+  // Live multi-website & cross-device real-time sync
   useEffect(() => {
+    // 1. Immediate fetch from full-stack server backend
+    fetchProductsFromServer().then((serverProds) => {
+      if (serverProds && serverProds.length > 0) {
+        setProducts(serverProds);
+      }
+    }).catch(console.error);
+
+    // 2. Real-time server push listener (SSE) across every open browser and website
+    const unsubLiveSync = subscribeToLiveSync(
+      (liveProds) => {
+        if (Array.isArray(liveProds) && liveProds.length > 0) {
+          setProducts(liveProds);
+        }
+      },
+      (liveSettings) => {
+        if (liveSettings) {
+          setSettings(prev => ({ ...prev, ...liveSettings }));
+        }
+      }
+    );
+
+    // 3. Live Firebase Firestore cloud database listener
     const unsubProducts = subscribeToProducts((liveProducts) => {
-      if (Array.isArray(liveProducts)) {
+      if (Array.isArray(liveProducts) && liveProducts.length > 0) {
         setProducts(liveProducts);
       }
     });
@@ -228,6 +244,7 @@ export default function App() {
     });
 
     return () => {
+      unsubLiveSync();
       unsubProducts();
       unsubSettings();
       unsubInquiries();
@@ -915,6 +932,9 @@ export default function App() {
             safeSetLocalStorage(STORAGE_KEYS.PRODUCTS, updated);
             return updated;
           });
+          // Dual save: To server for instant multi-device / multi-website reflection
+          saveProductToServer(prod).catch(console.error);
+          // And to Cloud Firestore
           saveProductToFirestore(prod).catch(console.error);
         }}
         onDeleteProduct={(id) => {
@@ -923,10 +943,12 @@ export default function App() {
             safeSetLocalStorage(STORAGE_KEYS.PRODUCTS, updated);
             return updated;
           });
+          deleteProductFromServer(id).catch(console.error);
           deleteProductFromFirestore(id).catch(console.error);
         }}
         onUpdateSettings={(newSettings) => {
           setSettings(newSettings);
+          saveSettingsToServer(newSettings).catch(console.error);
           saveSettingsToFirestore(newSettings).catch(console.error);
         }}
         onUpdateInquiryStatus={(inqId, status) => {
