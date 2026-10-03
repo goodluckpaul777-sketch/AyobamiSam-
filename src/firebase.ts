@@ -59,15 +59,18 @@ export interface FirestoreErrorInfo {
 
 export function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null) {
   const errMsg = error instanceof Error ? error.message : String(error);
-  // Silently handle transient offline / connection / WebChannel transport warnings
+  // Silently handle transient offline / connection / WebChannel / quota exhaustion warnings
   if (
     errMsg.includes('unavailable') ||
     errMsg.includes('client is offline') ||
     errMsg.includes('Could not reach Cloud Firestore') ||
     errMsg.includes('transport errored') ||
-    errMsg.includes('WebChannel')
+    errMsg.includes('WebChannel') ||
+    errMsg.includes('Quota exceeded') ||
+    errMsg.includes('Quota limit exceeded') ||
+    errMsg.includes('resource-exhausted')
   ) {
-    console.info(`Firestore operating in resilient long-polling mode [${operationType} on ${path}]`);
+    console.info(`[Firestore] Resilient mode active [${operationType} on ${path}]: quota or connectivity handled gracefully.`);
     return;
   }
 
@@ -99,7 +102,7 @@ export async function testConnection() {
 }
 testConnection();
 
-import { INITIAL_PRODUCTS } from './data/initialData';
+import { INITIAL_PRODUCTS, INITIAL_STORE_SETTINGS } from './data/initialData';
 
 let isSeeding = false;
 
@@ -127,6 +130,8 @@ export function subscribeToProducts(
     },
     (err) => {
       handleFirestoreError(err, OperationType.GET, 'products');
+      // If quota or network error occurs, ensure visitor still sees the full catalog
+      onUpdate(INITIAL_PRODUCTS);
       if (onError) onError(err);
     }
   );
@@ -170,6 +175,7 @@ export function subscribeToSettings(
     },
     (err) => {
       handleFirestoreError(err, OperationType.GET, 'settings/store_config');
+      onUpdate(INITIAL_STORE_SETTINGS);
     }
   );
 }

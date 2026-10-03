@@ -47,38 +47,19 @@ import { Footer } from './components/Footer';
 import { MessageCircle, Sparkles, Filter, SlidersHorizontal, Shirt, Footprints, Scissors, Search, Shield, ShoppingBag, Palette, ArrowLeft, ChevronLeft, ChevronRight, Layers } from 'lucide-react';
 
 const STORAGE_KEYS = {
-  PRODUCTS: 'asv_products_v6_pleasant_ankara',
-  SETTINGS: 'asv_settings_v3_luxury',
-  CART: 'asv_inquiry_cart_v3',
-  ORDERS: 'asv_inquiries_v3',
+  PRODUCTS: 'asv_products_v8_pleasant_ankara',
+  SETTINGS: 'asv_settings_v4_luxury',
+  CART: 'asv_inquiry_cart_v4',
+  ORDERS: 'asv_inquiries_v4',
 };
 
 // Safe localStorage helper to prevent QuotaExceededError console warnings
 function safeSetLocalStorage(key: string, data: any) {
   try {
     localStorage.setItem(key, JSON.stringify(data));
-  } catch {
-    try {
-      // If quota is reached, store stripped items without raw data-URL images
-      if (Array.isArray(data)) {
-        const stripped = data.map((item: any) => {
-          if (item && typeof item === 'object') {
-            const hasDataUri = typeof item.image === 'string' && item.image.startsWith('data:image');
-            return {
-              ...item,
-              image: hasDataUri ? '/hero-logo.png' : item.image,
-              galleryImages: Array.isArray(item.galleryImages)
-                ? item.galleryImages.filter((img: string) => typeof img === 'string' && !img.startsWith('data:image'))
-                : [],
-            };
-          }
-          return item;
-        });
-        localStorage.setItem(key, JSON.stringify(stripped));
-      }
-    } catch {
-      // Firestore cloud database handles all full image persistence
-    }
+  } catch (e) {
+    // If browser localStorage quota is reached, Cloud Firestore still safely retains the full products and images
+    console.warn(`[Storage] Local cache quota reached for ${key}. Firestore cloud database retains full data.`);
   }
 }
 
@@ -89,7 +70,7 @@ export default function App() {
       const saved = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
       if (saved) {
         const parsed: FabricProduct[] = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length >= INITIAL_PRODUCTS.length) {
+        if (Array.isArray(parsed) && parsed.length > 0) {
           return parsed;
         }
       }

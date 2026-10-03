@@ -308,6 +308,9 @@ export const ImageCarousel: React.FC<ImageCarouselProps> = ({
                   alt={`Thumbnail ${idx + 1}`}
                   className="w-full h-full object-cover"
                   loading="lazy"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = '/hero-logo.png';
+                  }}
                 />
               </button>
             ))}
