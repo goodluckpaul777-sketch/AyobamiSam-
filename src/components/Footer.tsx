@@ -1,24 +1,15 @@
 import React from 'react';
-import { StoreSettings, MainSectionType } from '../types';
-import { Phone, MessageCircle, MapPin, Clock, ArrowUp, ExternalLink, Shirt, Footprints, Scissors, Shield } from 'lucide-react';
+import { StoreSettings } from '../types';
+import { Phone, MessageCircle, MapPin, Clock, ArrowUp, ExternalLink, Shirt, Footprints, Scissors } from 'lucide-react';
 import { FacebookIcon, TikTokIcon } from './SocialIcons';
 import { OFFICIAL_LOGO_URL } from '../data/initialData';
 
 interface FooterProps {
   settings: StoreSettings;
-  onSelectSection: (section: MainSectionType) => void;
-  onNavigate: (tab: string) => void;
-  onOpenYardGuide: () => void;
-  onOpenAdmin: () => void;
+  onNavigateSection: (sectionId: string) => void;
 }
 
-export const Footer: React.FC<FooterProps> = ({
-  settings,
-  onSelectSection,
-  onNavigate,
-  onOpenYardGuide,
-  onOpenAdmin,
-}) => {
+export const Footer: React.FC<FooterProps> = ({ settings, onNavigateSection }) => {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -33,7 +24,7 @@ export const Footer: React.FC<FooterProps> = ({
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-12 pb-12 border-b border-[#245842]">
           
-          {/* Brand & Official Logo Column (Open & Bold) */}
+          {/* Brand & Official Logo Column */}
           <div className="lg:col-span-5 space-y-5">
             <div className="flex items-center gap-4">
               {logoSrc && (
@@ -41,12 +32,6 @@ export const Footer: React.FC<FooterProps> = ({
                   src={logoSrc}
                   alt="Ayobami SAM Ventures"
                   className="w-20 h-20 sm:w-24 sm:h-24 object-contain drop-shadow-xl hover:scale-105 transition-transform duration-300"
-                  onError={(e) => {
-                    const target = e.currentTarget;
-                    if (!target.src.includes('hero-logo.png')) {
-                      target.src = '/hero-logo.png';
-                    }
-                  }}
                 />
               )}
               <div>
@@ -67,7 +52,9 @@ export const Footer: React.FC<FooterProps> = ({
             {/* Direct Contact Links */}
             <div className="pt-2 flex flex-col gap-2.5 text-xs font-bold text-white">
               <a
-                href={`https://wa.me/${settings.whatsapp}?text=${encodeURIComponent(`Hello, ${settings.storeName || 'Ayobami SAM Ventures'}, I want to place an order.`)}`}
+                href={`https://wa.me/${settings.whatsapp}?text=${encodeURIComponent(
+                  `Hello, ${settings.storeName}. I want to place an order.`
+                )}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 text-[#52B788] hover:text-white"
@@ -104,76 +91,85 @@ export const Footer: React.FC<FooterProps> = ({
                   href={tiktokUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-black/40 hover:bg-black text-white border border-white/20 transition-all font-bold text-xs"
+                  className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-black text-[#25F4EE] border border-[#25F4EE]/40 hover:bg-black/80 transition-all font-bold text-xs"
                 >
-                  <TikTokIcon className="w-4 h-4 text-[#25F4EE]" />
-                  <span>TikTok (@ayobami.samuel31)</span>
+                  <TikTokIcon className="w-4 h-4" />
+                  <span>TikTok Videos</span>
                   <ExternalLink className="w-3 h-3 opacity-70" />
                 </a>
               </div>
             </div>
-
           </div>
 
-          {/* 3 Core Departments Navigation */}
-          <div className="lg:col-span-4 space-y-4">
-            <h4 className="text-sm font-black text-white uppercase tracking-widest border-b border-[#245842] pb-2 text-[#D4AF37]">
-              Our 3 Main Departments
-            </h4>
-            <div className="space-y-3">
-              
-              <button
-                onClick={() => {
-                  onSelectSection('cloths');
-                  onNavigate('catalog');
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
-                className="w-full text-left p-3 rounded-xl bg-[#143D2E] hover:bg-[#1B4E3B] border border-[#245842] transition-colors flex items-center justify-between"
-              >
-                <div className="flex items-center gap-2.5">
-                  <Shirt className="w-4 h-4 text-[#D4AF37]" />
-                  <span className="font-black text-white text-xs sm:text-sm">1. Cloths & Fabrics</span>
-                </div>
-                <span className="text-[11px] text-gray-400">Ankara, Lace, Senator</span>
-              </button>
-
-              <button
-                onClick={() => {
-                  onSelectSection('shoes');
-                  onNavigate('catalog');
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
-                className="w-full text-left p-3 rounded-xl bg-[#143D2E] hover:bg-[#1B4E3B] border border-[#245842] transition-colors flex items-center justify-between"
-              >
-                <div className="flex items-center gap-2.5">
-                  <Footprints className="w-4 h-4 text-[#D4AF37]" />
-                  <span className="font-black text-white text-xs sm:text-sm">2. Shoes & Bags</span>
-                </div>
-                <span className="text-[11px] text-gray-400">Sets, Loafers, Heels, Bags</span>
-              </button>
-
-              <button
-                onClick={() => {
-                  onSelectSection('tailoring-machine');
-                  onNavigate('catalog');
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
-                className="w-full text-left p-3 rounded-xl bg-[#143D2E] hover:bg-[#1B4E3B] border border-[#245842] transition-colors flex items-center justify-between"
-              >
-                <div className="flex items-center gap-2.5">
-                  <Scissors className="w-4 h-4 text-[#D4AF37]" />
-                  <span className="font-black text-white text-xs sm:text-sm">3. Tailoring Machines</span>
-                </div>
-                <span className="text-[11px] text-gray-400">Industrial & Butterfly</span>
-              </button>
-
-            </div>
-          </div>
-
-          {/* Quick Links & Location */}
+          {/* Quick Nav Links Column */}
           <div className="lg:col-span-3 space-y-4">
-            <h4 className="text-sm font-black text-white uppercase tracking-widest border-b border-[#245842] pb-2 text-[#D4AF37]">
-              Store & Admin Portal
+            <h4 className="text-sm font-black text-white uppercase tracking-wider border-b border-[#245842] pb-2">
+              Store Navigation
+            </h4>
+            <ul className="space-y-2.5 text-xs font-semibold">
+              <li>
+                <button
+                  onClick={() => onNavigateSection('departments-section')}
+                  className="hover:text-[#D4AF37] transition-colors"
+                >
+                  Our 3 Core Departments
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onNavigateSection('why-us-section')}
+                  className="hover:text-[#D4AF37] transition-colors"
+                >
+                  Why Shop With Us
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onNavigateSection('how-to-order-section')}
+                  className="hover:text-[#D4AF37] transition-colors"
+                >
+                  How to Place Orders
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onNavigateSection('delivery-section')}
+                  className="hover:text-[#D4AF37] transition-colors"
+                >
+                  Interstate Delivery & Waybills
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onNavigateSection('reviews-section')}
+                  className="hover:text-[#D4AF37] transition-colors"
+                >
+                  Customer Testimonials
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onNavigateSection('about-section')}
+                  className="hover:text-[#D4AF37] transition-colors"
+                >
+                  About Ayobami SAM Ventures
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onNavigateSection('contact-section')}
+                  className="hover:text-[#D4AF37] transition-colors"
+                >
+                  Storefront Address & Contact
+                </button>
+              </li>
+            </ul>
+          </div>
+
+          {/* Location & Visiting Hours */}
+          <div className="lg:col-span-4 space-y-4">
+            <h4 className="text-sm font-black text-white uppercase tracking-wider border-b border-[#245842] pb-2">
+              Physical Store Location
             </h4>
             <div className="space-y-2.5 text-xs text-[#C4B7A5]">
               <div className="flex items-start gap-2">
@@ -186,14 +182,18 @@ export const Footer: React.FC<FooterProps> = ({
               </div>
             </div>
 
-            <div className="pt-3 space-y-2">
-              <button
-                onClick={onOpenAdmin}
-                className="w-full py-2.5 px-4 rounded-xl bg-[#D4AF37] hover:bg-[#c49b29] text-[#0F2E22] font-black text-xs flex items-center justify-center gap-2 shadow"
+            <div className="pt-3">
+              <a
+                href={`https://wa.me/${settings.whatsapp}?text=${encodeURIComponent(
+                  `Hello, ${settings.storeName}. I would like to visit your Balogun store.`
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full py-3 px-4 rounded-xl bg-[#25D366] hover:bg-[#1EBE5D] text-white font-black text-xs flex items-center justify-center gap-2 shadow"
               >
-                <Shield className="w-4 h-4" />
-                <span>Store Owner Admin Portal</span>
-              </button>
+                <MessageCircle className="w-4 h-4 fill-current" />
+                <span>WhatsApp Customer Desk</span>
+              </a>
             </div>
           </div>
 
@@ -202,12 +202,12 @@ export const Footer: React.FC<FooterProps> = ({
         {/* Bottom Bar */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#A89A88]">
           <p className="font-medium text-center sm:text-left">
-            © {new Date().getFullYear()} {settings.storeName}. All Rights Reserved. Lagos, Nigeria.
+            © {new Date().getFullYear()} {settings.storeName}. All Rights Reserved. Balogun Market, Lagos Island, Nigeria.
           </p>
 
           <button
             onClick={scrollToTop}
-            className="flex items-center gap-2 text-white hover:text-[#D4AF37] font-black bg-[#143D2E] px-4 py-2 rounded-xl transition-colors border border-[#245842]"
+            className="flex items-center gap-2 text-white hover:text-[#D4AF37] font-black bg-[#143D2E] px-4 py-2 rounded-xl transition-colors border border-[#245842] cursor-pointer"
           >
             <span>Back to top</span>
             <ArrowUp className="w-4 h-4" />
