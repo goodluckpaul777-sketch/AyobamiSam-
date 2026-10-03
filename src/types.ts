@@ -17,8 +17,6 @@ export interface FabricProduct {
   isNewArrival: boolean;
   isFeatured: boolean;
   inStock: boolean;
-  isBestseller?: boolean;
-  pricePerYard?: number;
   rating?: number;
   reviewCount?: number;
   suitableFor: string[];
@@ -32,7 +30,6 @@ export interface FabricProduct {
   colorVariant?: string; // Color name of this specific variant
   isMatchingSet?: boolean; // True if item is a matching 2-in-1 shoe and bag set
   designType?: 'matching-group' | 'distinct-design'; // 'matching-group' or 'distinct-design'
-  productCode?: string; // e.g. "019004-1" design code for admin identification
 }
 
 export interface InquiryItem {

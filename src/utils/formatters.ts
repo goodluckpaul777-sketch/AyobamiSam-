@@ -25,80 +25,65 @@ export function cleanNigerianPhone(phone: string): string {
 }
 
 /**
- * Generate a pre-filled WhatsApp link for a single item
+ * Generate a pre-filled WhatsApp inquiry link for a single item (No Price Tag)
  */
 export function generateWhatsAppProductLink(
   phone: string,
   product: FabricProduct,
-  itemNumber: number = 1,
+  quantity: number,
+  selectedColor?: string,
+  customerName?: string,
+  location?: string,
   storeName: string = 'Ayobami SAM Ventures'
 ): string {
   const targetPhone = cleanNigerianPhone(phone);
-  const company = storeName || 'Ayobami SAM Ventures';
-  const productCode = product.productCode || product.id.toUpperCase();
+  const unit = product.unitLabel || (quantity === 1 ? 'Unit' : 'Units');
+  const section = product.mainSection === 'cloths' ? 'Cloths' : product.mainSection === 'shoes' ? 'Shoes' : 'Tailoring Machine';
   
-  const text = `Hello, ${company}
+  const text = `Hello ${storeName}, I want to inquire about this product:
 
-- Company: ${company}
-- Type of Clothes: ${product.name}
-- Item Number: #${itemNumber}
-- Product Code: ${productCode}
-
-I want to place an order.`;
+📌 *Item:* ${product.name}
+📂 *Section:* ${section} (${product.category})
+🧵 *Material/Spec:* ${product.fabricType}
+🔢 *Quantity:* ${quantity} ${unit}
+${selectedColor ? `🎨 *Option / Colour:* ${selectedColor}\n` : ''}${customerName ? `👤 *Customer Name:* ${customerName}\n` : ''}${location ? `📍 *Delivery Location:* ${location}\n` : ''}
+Please let me know the current price quotation, pictures, and delivery timeline. Thank you!`;
 
   return `https://wa.me/${targetPhone}?text=${encodeURIComponent(text)}`;
 }
 
 /**
- * Generate a pre-filled WhatsApp link for multiple items (Cart/Inquiry Bag)
+ * Generate a pre-filled WhatsApp inquiry link for multiple items
  */
 export function generateWhatsAppCartLink(
   phone: string,
   items: InquiryItem[],
+  customer?: CustomerInquiryInfo,
   storeName: string = 'Ayobami SAM Ventures'
 ): string {
   const targetPhone = cleanNigerianPhone(phone);
-  const company = storeName || 'Ayobami SAM Ventures';
   
-  if (!items || items.length === 0) {
-    const defaultText = `Hello, ${company}, I want to place an order.`;
-    return `https://wa.me/${targetPhone}?text=${encodeURIComponent(defaultText)}`;
+  let itemLines = items.map((item, index) => {
+    const unit = item.product.unitLabel || (item.quantity === 1 ? 'Unit' : 'Units');
+    return `${index + 1}. *${item.product.name}*
+   - Quantity: ${item.quantity} ${unit} (${item.product.category})${item.selectedColor ? ` [${item.selectedColor}]` : ''}`;
+  }).join('\n\n');
+
+  let text = `Hello ${storeName}, I would like to request price quotations for these items:
+
+📦 *INQUIRY LIST:*
+${itemLines}`;
+
+  if (customer && customer.fullName) {
+    text += `\n\n👤 *CUSTOMER DETAILS:*
+- Name: ${customer.fullName}
+- Phone: ${customer.phone}
+- State: ${customer.state}
+- City: ${customer.city}
+${customer.notes ? `- Note: ${customer.notes}\n` : ''}`;
   }
 
-  const itemLines = items.map((item, index) => {
-    const code = item.product.productCode || item.product.id.toUpperCase();
-    return `- Type of Clothes: ${item.product.name} (Item #${index + 1}, Code: ${code})`;
-  }).join('\n');
-
-  const text = `Hello, ${company}
-
-- Company: ${company}
-${itemLines}
-
-I want to place an order.`;
+  text += `\n\nPlease send me prices and payment/delivery details. Thank you!`;
 
   return `https://wa.me/${targetPhone}?text=${encodeURIComponent(text)}`;
 }
-
-/**
- * Safely opens a URL without triggering window.open security exceptions in sandboxed iframes
- */
-export function safeOpenUrl(url: string) {
-  if (typeof window === 'undefined' || !url) return;
-  try {
-    const a = document.createElement('a');
-    a.href = url;
-    a.target = '_blank';
-    a.rel = 'noopener noreferrer';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  } catch {
-    try {
-      window.open(url, '_blank', 'noopener,noreferrer');
-    } catch {
-      window.location.href = url;
-    }
-  }
-}
-

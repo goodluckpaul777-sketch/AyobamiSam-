@@ -36,7 +36,7 @@ export const WhyShopWithUs: React.FC = () => {
   ];
 
   return (
-    <section className="py-16 sm:py-24 bg-white border-b border-[#E8E2D9]" id="why-us-section">
+    <section className="py-16 sm:py-24 bg-white border-b border-[#E8E2D9]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Header */}

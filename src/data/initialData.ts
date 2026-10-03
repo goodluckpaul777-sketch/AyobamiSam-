@@ -1,172 +1,136 @@
-import { StoreSettings, CustomerTestimonial, NigerianStateDelivery } from '../types';
+import { Category, FabricProduct, StoreSettings, SectionCategoryInfo, TailoringYardGuide, CustomerTestimonial } from '../types';
+
+export const INITIAL_CATEGORIES: Category[] = [
+];
+
+export const INITIAL_PRODUCTS: FabricProduct[] = [
+];
+
+export const STORE_SETTINGS: StoreSettings = {
+  storeName: 'Ayobami SAM Ventures',
+  tagline: 'Premium Fabrics, Bespoke Shoes & Bags, and Tailoring Equipment',
+  address: '37/39 Balogun West, Molake House, Lagos Island, Nigeria',
+  marketLocation: '37/39 Balogun West, Molake House, Lagos Island',
+  city: 'Lagos Island',
+  state: 'Lagos State',
+  country: 'Nigeria',
+  phone: '08033810865',
+  phoneNumbers: ['08033810865', '+234 803 381 0865'],
+  secondaryPhone: '+234 803 381 0865',
+  whatsapp: '2348033810865',
+  email: '',
+  announcement: '✨ Welcome to Ayobami SAM Ventures! Direct Wholesale & Retail for Fabrics, Shoes, Matching Bags & Tailoring Machines. Click any product to order directly on WhatsApp!',
+  themeColor: '#0F2E22',
+  logoUrl: '/hero-logo.png',
+  aboutText: 'Ayobami SAM Ventures (ASV) is your trusted Nigerian merchant for authentic Swiss Voile Laces, Dutch Wax Ankara, Cashmere Senator suitings, Atiku Brocades, handcrafted Italian native shoes, coordinated 2-in-1 matching shoe and bag sets, and industrial sewing equipment. Serving retail fashion enthusiasts and wholesale merchants nationwide.',
+  businessType: 'Wholesale & Retail Merchant',
+  customerReach: 'Nationwide & International Diaspora Delivery',
+  openingHours: 'Open 24/7 (Always Open for Orders & Inquiries)',
+  bankDetails: {
+    bankName: '',
+    accountNumber: '',
+    accountName: ''
+  },
+  stateDeliveryRates: {
+    'Lagos State': { name: 'Lagos State', rate: 2500, deliveryDays: '24 - 48 Hours' },
+    'Oyo State (Ibadan)': { name: 'Oyo State (Ibadan)', rate: 1500, deliveryDays: 'Same Day / 24 Hours' },
+    'Ogun State': { name: 'Ogun State', rate: 3000, deliveryDays: '24 - 48 Hours' },
+    'Osun State': { name: 'Osun State', rate: 3000, deliveryDays: '24 - 48 Hours' },
+    'Ondo State': { name: 'Ondo State', rate: 3500, deliveryDays: '2 - 3 Days' },
+    'Ekiti State': { name: 'Ekiti State', rate: 3500, deliveryDays: '2 - 3 Days' },
+    'FCT Abuja': { name: 'FCT Abuja', rate: 4500, deliveryDays: '2 - 3 Days' },
+    'Rivers State (Port Harcourt)': { name: 'Rivers State (Port Harcourt)', rate: 5000, deliveryDays: '2 - 4 Days' },
+    'Kano / Kaduna State': { name: 'Kano / Kaduna State', rate: 5500, deliveryDays: '3 - 5 Days' },
+    'Other States / Nationwide Interstate': { name: 'Other States / Nationwide Interstate', rate: 4500, deliveryDays: '2 - 4 Days via Interstate Park / Courier' }
+  },
+  freeDeliveryThreshold: 100000,
+  enableWhatsAppDirect: true
+};
+
+export const INITIAL_STORE_SETTINGS = STORE_SETTINGS;
 
 export const OFFICIAL_LOGO_URL = '/hero-logo.png';
 
-export const NIGERIA_STATES_DELIVERY: NigerianStateDelivery[] = [
-  { name: "Lagos State (Island & Mainland)", rate: 2500, deliveryDays: "Same-day or 24 Hours" },
-  { name: "Ogun & Oyo States (Ibadan, Abeokuta)", rate: 3500, deliveryDays: "24 - 48 Hours" },
-  { name: "Abuja FCT", rate: 5000, deliveryDays: "1 - 2 Business Days" },
-  { name: "Port Harcourt & Rivers State", rate: 5000, deliveryDays: "2 - 3 Business Days" },
-  { name: "Enugu, Anambra & South East", rate: 4500, deliveryDays: "2 - 3 Business Days" },
-  { name: "Kano, Kaduna & Northern Nigeria", rate: 6000, deliveryDays: "2 - 4 Business Days" },
-  { name: "Edo & Delta States", rate: 4500, deliveryDays: "2 - 3 Business Days" },
-  { name: "All Other Nigerian States", rate: 5000, deliveryDays: "2 - 4 Business Days" },
-  { name: "International Shipping (UK, US, Canada, EU)", rate: 35000, deliveryDays: "4 - 7 Business Days via DHL / Air Cargo" },
+export const CATEGORIES = INITIAL_CATEGORIES;
+
+export const MAIN_SECTIONS: SectionCategoryInfo[] = [
 ];
 
-export const INITIAL_STORE_SETTINGS: StoreSettings = {
-  storeName: "Ayobami SAM Ventures",
-  tagline: "Premier Nigerian Hub for Quality Cloths, Shoes & Tailoring Machines",
-  phone: "08033810865",
-  whatsapp: "2348033810865",
-  secondaryPhone: "09150996348",
-  phoneNumbers: ["08033810865", "09150996348"],
-  email: "ayobamisamuelventures@gmail.com",
-  address: "37/39 Balogun West, Molake House, Lagos Island, Nigeria",
-  marketLocation: "37/39 Balogun West, Molake House, Lagos Island",
-  city: "Lagos Island",
-  state: "Lagos",
-  country: "Nigeria",
-  openingHours: "Mon - Sat: 8:00 AM - 6:00 PM (Sunday: Closed)",
-  logoUrl: OFFICIAL_LOGO_URL,
-  facebook: "https://www.facebook.com/share/1BeLmWzV8P/",
-  tiktok: "https://www.tiktok.com/@ayobami.samuel31",
-  announcement: "📍 Visit us at 37/39 Balogun West, Molake House, Lagos Island • Wholesale & Retail Available • Nationwide & International Delivery",
-  bankDetails: {
-    bankName: "First Bank of Nigeria / Moniepoint",
-    accountNumber: "Available on Invoice",
-    accountName: "Ayobami SAM Ventures",
-  },
-  stateDeliveryRates: NIGERIA_STATES_DELIVERY.reduce((acc, curr) => {
-    acc[curr.name] = curr;
-    return acc;
-  }, {} as Record<string, NigerianStateDelivery>),
-  enableWhatsAppDirect: true,
-};
-
-export interface DepartmentInfo {
-  id: string;
-  name: string;
-  subtitle: string;
-  description: string;
-  badge: string;
-  highlights: string[];
-  popularUses: string;
-}
-
-export const MAIN_DEPARTMENTS: DepartmentInfo[] = [
+export const TAILORING_YARD_GUIDES: TailoringYardGuide[] = [
   {
-    id: "cloths-fabrics",
-    name: "Cloths & Authentic Fabrics",
-    subtitle: "Premium African Prints, Swiss Lace & Senator Suiting",
-    badge: "Wholesale & Retail Bales",
-    description: "Authentic 100% cotton Pleasant Dutch Wax prints, luxury Swiss voile lace, dry cord lace, and Super 150s executive Senator cashmere suiting. Sourced directly for Owambe ceremonies, uniform Aso-Ebi, fashion designers, and everyday elegance.",
-    highlights: [
-      "100% Pure Cotton Pleasant Dutch Wax (6-yard bundles & wholesale bales)",
-      "Exclusive Swiss Voile, Dry Lace, Cord Lace & French Beaded Tulle",
-      "Executive Senator Suiting, Cashmere Wool Blends & Crease-Resistant Fabrics",
-      "Custom Aso-Ebi color coordination for weddings, coronations & celebrations",
-      "Bulk merchant pricing for retailers and boutique owners nationwide"
-    ],
-    popularUses: "Aso-Ebi wedding uniforms, executive native agbada, kaftans, dresses, and fashion retail boutiques."
+    outfitName: 'Full 3-Piece Grand Agbada with Buba & Sokoto',
+    gender: 'Men',
+    recommendedYards: 10,
+    yardRange: '8 - 10 Yards',
+    suggestedFabrics: ['Atiku Cotton', 'Guinea Brocade (Bazin Riche)', 'Senator Cashmere'],
+    description: 'Generous 10-yard cut provides ample fullness for royal drape and high-cap sleeve folds.'
   },
   {
-    id: "shoes-bags",
-    name: "Shoes & Matching Handbags",
-    subtitle: "Italian Leather Loafers, Mules & Royal 2-in-1 Party Sets",
-    badge: "Handcrafted Luxury",
-    description: "Artisan handcrafted footwear made from burnished Italian calfskin, luxury velvet loafers, royal slip-on mules, and coordinated 2-in-1 matching shoe and clutch bag sets crafted for distinguished Nigerian celebrations and corporate elegance.",
-    highlights: [
-      "Matching 2-in-1 Luxury Shoe and Handbag / Clutch Sets for Owambe occasions",
-      "Handcrafted Italian Burnished Calfskin Loafers, Mules & Slip-on Slippers",
-      "Royal embroidered velvet slippers for traditional weddings and chiefs",
-      "Comfort-cushioned orthopedic insoles built for long-duration party wear",
-      "All standard Nigerian and European sizes (EU 38 to 47)"
-    ],
-    popularUses: "Owambe ceremonies, weddings, executive boardroom native wear, and social milestones."
+    outfitName: 'Classic Senator Native Suit (Top & Trouser)',
+    gender: 'Men',
+    recommendedYards: 4,
+    yardRange: '4 Yards',
+    suggestedFabrics: ['Super 150s Wool Cashmere', 'Wool Blend Suiting'],
+    description: 'Standard 4 yards allows full shirt length with chest pockets and tailored trouser cuts.'
   },
   {
-    id: "tailoring-machines",
-    name: "Industrial & Domestic Tailoring Machines",
-    subtitle: "Heavy-Duty Lockstitch, Overlock Sergers & Spare Parts",
-    badge: "Direct Factory Imports",
-    description: "Heavy-duty direct-drive lockstitch sewing machines, multi-thread industrial overlockers, computerized pattern stitchers, and reliable domestic sewing machines. Tested, tuned, and supplied with full accessories, motors, and replacement parts.",
-    highlights: [
-      "Direct-drive high-speed industrial lockstitch sewing machines",
-      "Multi-thread overlock sergers, hemming, and buttonholing machinery",
-      "Heavy-duty leather, denim, and multi-layer fabric walking-foot machines",
-      "Multi-stitch domestic machines for fashion academies and home ateliers",
-      "Complete machine tables, quiet energy-saving servo motors & authentic spare parts"
-    ],
-    popularUses: "Garment manufacturing factories, tailoring academies, bespoke designers, and industrial workshops."
+    outfitName: 'Long Owambe Fitted Corset Gown with Train',
+    gender: 'Women',
+    recommendedYards: 5,
+    yardRange: '5 - 6 Yards',
+    suggestedFabrics: ['Swiss Voile Lace', 'French Beaded Net Lace', 'Sequined Lace'],
+    description: '5 yards is the standard Nigerian bundle size for floor-length luxury gowns.'
+  },
+  {
+    outfitName: 'Six-Piece Mermaid Skirt and Peplum Blouse',
+    gender: 'Women',
+    recommendedYards: 6,
+    yardRange: '6 Yards (1 Bundle)',
+    suggestedFabrics: ['Dutch Wax Ankara', 'African Wax Cotton'],
+    description: 'Full 6-yard bundle allows perfect pattern alignment on flared panels and peplum pleats.'
+  },
+  {
+    outfitName: 'Simple Kaftan / Short-Sleeve Daily Native',
+    gender: 'General',
+    recommendedYards: 3.5,
+    yardRange: '3 - 3.5 Yards',
+    suggestedFabrics: ['Cotton Atiku', 'Lightweight Senator Wool'],
+    description: 'Ideal economic cut for casual weekday or Friday native shirts and trousers.'
   }
 ];
 
 export const CUSTOMER_TESTIMONIALS: CustomerTestimonial[] = [
   {
-    id: "rev-1",
-    customerName: "Alhaja Shakirat O.",
-    location: "Lagos Island (Balogun Market Regular)",
-    title: "100% Genuine Fabrics Every Single Time",
-    comment: "I have been buying fabric from Ayobami SAM Ventures at Balogun West for over 4 years. Their Pleasant Ankara never bleeds and their Swiss voile lace is top tier. You can trust them with your money without hesitation.",
+    id: 'rev-01',
+    customerName: 'Alhaja Kudirat Adeleke',
+    location: 'Bodija, Ibadan',
+    title: 'Aso-Ebi Lead Organizer',
+    comment: 'We ordered 85 bundles of Swiss Voile Lace and matching shoe/bag sets for my daughter wedding. Everything arrived exactly as pictured and the quality was top tier. Our guests were thrilled!',
     rating: 5,
-    date: "September 2026",
+    date: '3 weeks ago',
     verifiedBuyer: true,
-    fabricBought: "Pleasant Ankara & Swiss Voile"
+    fabricBought: 'Swiss Voile Lace & Matching Shoe/Bag Set'
   },
   {
-    id: "rev-2",
-    customerName: "Chief Emeka N.",
-    location: "Enugu & Abuja",
-    title: "Fast Waybill Dispatch to the East",
-    comment: "Ordered 5 bales of Senator material and 2 industrial machines for my tailoring factory in Enugu. Everything was carefully packaged and sent via interstate transport park within 24 hours. Very reliable business.",
+    id: 'rev-02',
+    customerName: 'Chief Babatunde Ogundimu',
+    location: 'Victoria Island, Lagos',
+    title: 'VIP Senator Client',
+    comment: 'The Italian burnished loafers and Super 150s cashmere senator material were delivered promptly. The leather is soft, durable, and comfortable all day during chieftaincy meetings.',
     rating: 5,
-    date: "August 2026",
+    date: '1 month ago',
     verifiedBuyer: true,
-    fabricBought: "Senator Wool Bales & Industrial Machines"
+    fabricBought: 'Super 150s Cashmere & Italian Loafers'
   },
   {
-    id: "rev-3",
-    customerName: "Mrs. Folashade Adeyemi",
-    location: "Ibadan, Oyo State",
-    title: "Stunning Matching Shoe and Bag Sets",
-    comment: "I bought 12 sets of coordinated shoes and clutch bags for our daughter's wedding Aso-Ebi. Every guest was praising the quality. The leather finish is exceptional!",
+    id: 'rev-03',
+    customerName: 'Mrs. Funmilayo Bakare',
+    location: 'Garki, Abuja',
+    title: 'Fashion Academy Director',
+    comment: 'We purchased 6 industrial direct-drive sewing machines and Butterfly sets for our tailoring training institute. Smooth silent operation, fast delivery, and very responsive customer support on WhatsApp.',
     rating: 5,
-    date: "August 2026",
+    date: '2 months ago',
     verifiedBuyer: true,
-    fabricBought: "2-in-1 Royal Shoe & Bag Sets"
-  },
-  {
-    id: "rev-4",
-    customerName: "Engr. Tunde Bakare",
-    location: "Lekki Phase 1, Lagos",
-    title: "Solid Direct-Drive Sewing Machines",
-    comment: "Equipped my wife's fashion design studio with 6 industrial sewing machines from Ayobami SAM Ventures. Smooth motors, quiet operation, and prompt technical support.",
-    rating: 5,
-    date: "July 2026",
-    verifiedBuyer: true,
-    fabricBought: "Direct-Drive Industrial Lockstitch"
-  },
-  {
-    id: "rev-5",
-    customerName: "Madam Beatrice Kalu",
-    location: "Port Harcourt, Rivers State",
-    title: "Honest Merchant & Excellent Customer Care",
-    comment: "I placed my order entirely through WhatsApp from Port Harcourt. They sent videos, packed my goods securely, and the waybill arrived safely. A truly dependable merchant.",
-    rating: 5,
-    date: "July 2026",
-    verifiedBuyer: true,
-    fabricBought: "Pleasant Dutch Wax & Dry Lace"
-  },
-  {
-    id: "rev-6",
-    customerName: "Dr. Funmi Williams",
-    location: "London, United Kingdom (Diaspora Order)",
-    title: "Seamless International Delivery",
-    comment: "Ordered native fabric and accessories for our family reunion in the UK. They handled packaging and DHL air dispatch smoothly. Outstanding professionalism.",
-    rating: 5,
-    date: "June 2026",
-    verifiedBuyer: true,
-    fabricBought: "Aso-Ebi Uniform Package"
+    fabricBought: 'Industrial Direct-Drive Machines'
   }
 ];
