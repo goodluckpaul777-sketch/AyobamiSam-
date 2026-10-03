@@ -55,31 +55,23 @@ export function normalizeImageUrl(url: any): string {
 // -----------------------------------------------------
 const PRODUCTS_KEY = 'asv_products_offline';
 
-// Force-wipe all database collections on script load to guarantee a 100% clean state
-if (typeof window !== 'undefined') {
-  localStorage.removeItem('asv_products_offline');
-  localStorage.removeItem('asv_inquiries_offline');
-  localStorage.removeItem('asv_products');
-  localStorage.removeItem('asv_settings_');
-  localStorage.removeItem('asv_cart_v1');
-  localStorage.removeItem('asv_orders_v1');
-}
-
 function loadProductsFromStorage(): FabricProduct[] {
   try {
     const data = localStorage.getItem(PRODUCTS_KEY);
     if (data) {
       const parsed = JSON.parse(data);
-      if (Array.isArray(parsed)) {
+      if (Array.isArray(parsed) && parsed.length > 0) {
         return parsed;
       }
     }
   } catch (e) {
     console.error('Failed to load local products:', e);
   }
-  // Initialize with initial empty products array
-  localStorage.setItem(PRODUCTS_KEY, JSON.stringify([]));
-  return [];
+  // Initialize with initial products
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(PRODUCTS_KEY, JSON.stringify(INITIAL_PRODUCTS));
+  }
+  return INITIAL_PRODUCTS;
 }
 
 export function subscribeToProducts(

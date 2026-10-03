@@ -65,7 +65,10 @@ export default function App() {
       let list = INITIAL_PRODUCTS;
       if (saved) {
         const parsed: FabricProduct[] = JSON.parse(saved);
-        list = parsed.filter(p => !p.id.includes('pleasant-ankara') && !(p.name && p.name.toLowerCase().includes('pleasant ankara')));
+        const filtered = parsed.filter(p => !p.id.includes('pleasant-ankara') && !(p.name && p.name.toLowerCase().includes('pleasant ankara')));
+        if (filtered.length > 0) {
+          list = filtered;
+        }
       }
       return list.map(p => {
         const img = normalizeImageUrl(p.image);
@@ -221,7 +224,7 @@ export default function App() {
   // Live real-time catalog listeners for all store visitors
   useEffect(() => {
     const unsubProducts = subscribeToProducts((liveProducts) => {
-      if (Array.isArray(liveProducts)) {
+      if (Array.isArray(liveProducts) && liveProducts.length > 0) {
         setProducts(liveProducts);
       }
     });
