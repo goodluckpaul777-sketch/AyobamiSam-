@@ -15,15 +15,13 @@ import {
 } from './data/initialData';
 import {
   subscribeToProducts,
-  saveProductToDatabase,
-  deleteProductFromDatabase,
+  saveProductToFirestore,
+  deleteProductFromFirestore,
   subscribeToSettings,
-  saveSettingsToDatabase,
+  saveSettingsToFirestore,
   subscribeToInquiries,
-  saveInquiryToDatabase,
-  subscribeToQuotaExceeded,
-  normalizeImageUrl,
-} from './services/catalogService';
+  saveInquiryToFirestore,
+} from './firebase';
 import { Header } from './components/Header';
 import { Hero } from './components/Hero';
 import { CategoryGrid } from './components/CategoryGrid';
@@ -48,12 +46,32 @@ const STORAGE_KEYS = {
   ORDERS: 'asv_inquiries_v3',
 };
 
-// Safe localStorage helper that never mutates or replaces user product images
+// Safe localStorage helper to prevent QuotaExceededError console warnings
 function safeSetLocalStorage(key: string, data: any) {
   try {
     localStorage.setItem(key, JSON.stringify(data));
-  } catch (err) {
-    console.warn(`LocalStorage quota reached for key ${key}. Full image data preserved in memory and database.`);
+  } catch {
+    try {
+      // If quota is reached, store stripped items without raw data-URL images
+      if (Array.isArray(data)) {
+        const stripped = data.map((item: any) => {
+          if (item && typeof item === 'object') {
+            const hasDataUri = typeof item.image === 'string' && item.image.startsWith('data:image');
+            return {
+              ...item,
+              image: hasDataUri ? '/hero-logo.png' : item.image,
+              galleryImages: Array.isArray(item.galleryImages)
+                ? item.galleryImages.filter((img: string) => typeof img === 'string' && !img.startsWith('data:image'))
+                : [],
+            };
+          }
+          return item;
+        });
+        localStorage.setItem(key, JSON.stringify(stripped));
+      }
+    } catch {
+      // Firestore cloud database handles all full image persistence
+    }
   }
 }
 
@@ -62,47 +80,28 @@ export default function App() {
   const [products, setProducts] = useState<FabricProduct[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
-      let list = INITIAL_PRODUCTS;
       if (saved) {
         const parsed: FabricProduct[] = JSON.parse(saved);
         const filtered = parsed.filter(p => !p.id.includes('pleasant-ankara') && !(p.name && p.name.toLowerCase().includes('pleasant ankara')));
-        if (filtered.length > 0) {
-          list = filtered;
-        }
+        return filtered.map(p => {
+          if (p.mainSection === 'shoes' || (p.categorySlug && p.categorySlug.includes('shoe'))) {
+            const isOldName = p.name === 'Handcrafted Italian Leather Native Loafers';
+            return {
+              ...p,
+              name: isOldName ? 'Italian Leather 2-in-1 Matching Shoe & Handbag Set' : p.name,
+              category: 'Matching Shoe & Bag Set',
+              categorySlug: 'shoe-and-bag',
+              unitLabel: '1 Matching Set (Shoe + Bag)',
+              isMatchingSet: true,
+              fabricType: isOldName ? '100% Genuine Italian Calfskin Leather with Matching Clutch' : p.fabricType,
+            };
+          }
+          return p;
+        });
       }
-      return list.map(p => {
-        const img = normalizeImageUrl(p.image);
-        const gallery = Array.isArray(p.galleryImages)
-          ? p.galleryImages.map(img => normalizeImageUrl(img))
-          : p.galleryImages ? [normalizeImageUrl(p.image)] : [];
-        if (p.mainSection === 'shoes' || (p.categorySlug && p.categorySlug.includes('shoe'))) {
-          const isOldName = p.name === 'Handcrafted Italian Leather Native Loafers';
-          return {
-            ...p,
-            image: img,
-            galleryImages: gallery,
-            name: isOldName ? 'Italian Leather 2-in-1 Matching Shoe & Handbag Set' : p.name,
-            category: 'Matching Shoe & Bag Set',
-            categorySlug: 'shoe-and-bag',
-            unitLabel: '1 Matching Set (Shoe + Bag)',
-            isMatchingSet: true,
-            fabricType: isOldName ? '100% Genuine Italian Calfskin Leather with Matching Clutch' : p.fabricType,
-          };
-        }
-        return {
-          ...p,
-          image: img,
-          galleryImages: gallery
-        };
-      });
+      return INITIAL_PRODUCTS;
     } catch {
-      return INITIAL_PRODUCTS.map(p => ({
-        ...p,
-        image: normalizeImageUrl(p.image),
-        galleryImages: Array.isArray(p.galleryImages)
-          ? p.galleryImages.map(img => normalizeImageUrl(img))
-          : p.galleryImages ? [normalizeImageUrl(p.image)] : []
-      }));
+      return INITIAL_PRODUCTS;
     }
   });
 
@@ -133,11 +132,7 @@ export default function App() {
   const [inquiryItems, setInquiryItems] = useState<InquiryItem[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.CART);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        return Array.isArray(parsed) ? parsed : [];
-      }
-      return [];
+      return saved ? JSON.parse(saved) : [];
     } catch {
       return [];
     }
@@ -146,11 +141,7 @@ export default function App() {
   const [inquiries, setInquiries] = useState<InquiryRecord[]>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.ORDERS);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        return Array.isArray(parsed) ? parsed : [];
-      }
-      return [];
+      return saved ? JSON.parse(saved) : [];
     } catch {
       return [];
     }
@@ -193,18 +184,7 @@ export default function App() {
   const [isYardGuideOpen, setIsYardGuideOpen] = useState(false);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
 
-  const [quotaWarning, setQuotaWarning] = useState<{ isExceeded: boolean; link: string } | null>(null);
-
-  useEffect(() => {
-    const unsubQuota = subscribeToQuotaExceeded((isExceeded, link) => {
-      if (isExceeded) {
-        setQuotaWarning({ isExceeded: true, link });
-      }
-    });
-    return () => unsubQuota();
-  }, []);
-
-  // Sync to localStorage safely with quota fallback
+  // Sync to localStorage safely with quota fallback (Firestore is primary cloud storage)
   useEffect(() => {
     safeSetLocalStorage(STORAGE_KEYS.PRODUCTS, products);
   }, [products]);
@@ -221,10 +201,10 @@ export default function App() {
     safeSetLocalStorage(STORAGE_KEYS.ORDERS, inquiries);
   }, [inquiries]);
 
-  // Live real-time catalog listeners for all store visitors
+  // Live Firebase Real-time listeners for all store visitors
   useEffect(() => {
     const unsubProducts = subscribeToProducts((liveProducts) => {
-      if (Array.isArray(liveProducts) && liveProducts.length > 0) {
+      if (Array.isArray(liveProducts)) {
         setProducts(liveProducts);
       }
     });
@@ -313,7 +293,7 @@ export default function App() {
     };
 
     setInquiries(prev => [newInquiry, ...prev]);
-    saveInquiryToDatabase(newInquiry).catch(console.error);
+    saveInquiryToFirestore(newInquiry).catch(console.error);
   };
 
   // Product Filter with Automatic Code Assignment, Code Priority Sorting & 10-Item Pagination
@@ -935,7 +915,7 @@ export default function App() {
             safeSetLocalStorage(STORAGE_KEYS.PRODUCTS, updated);
             return updated;
           });
-          saveProductToDatabase(prod).catch(console.error);
+          saveProductToFirestore(prod).catch(console.error);
         }}
         onDeleteProduct={(id) => {
           setProducts(prev => {
@@ -943,29 +923,25 @@ export default function App() {
             safeSetLocalStorage(STORAGE_KEYS.PRODUCTS, updated);
             return updated;
           });
-          deleteProductFromDatabase(id).catch(console.error);
+          deleteProductFromFirestore(id).catch(console.error);
         }}
         onUpdateSettings={(newSettings) => {
           setSettings(newSettings);
-          saveSettingsToDatabase(newSettings).catch(console.error);
+          saveSettingsToFirestore(newSettings).catch(console.error);
         }}
         onUpdateInquiryStatus={(inqId, status) => {
           setInquiries(prev => {
             const updated = prev.map(inq => inq.id === inqId ? { ...inq, status } : inq);
             const target = updated.find(i => i.id === inqId);
-            if (target) saveInquiryToDatabase(target).catch(console.error);
+            if (target) saveInquiryToFirestore(target).catch(console.error);
             return updated;
           });
         }}
         onResetToDefaults={() => {
           setProducts(INITIAL_PRODUCTS);
           setSettings(INITIAL_STORE_SETTINGS);
-          try {
-            localStorage.removeItem(STORAGE_KEYS.PRODUCTS);
-            localStorage.removeItem(STORAGE_KEYS.SETTINGS);
-          } catch {
-            // ignore
-          }
+          localStorage.removeItem(STORAGE_KEYS.PRODUCTS);
+          localStorage.removeItem(STORAGE_KEYS.SETTINGS);
         }}
       />
 

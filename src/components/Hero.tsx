@@ -38,12 +38,6 @@ export const Hero: React.FC<HeroProps> = ({
               src={logoSrc || '/hero-logo.png'}
               alt="Ayobami SAM Ventures Royal Logo"
               className="relative w-16 h-16 sm:w-36 sm:h-36 lg:w-48 lg:h-48 object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)] group-hover:scale-105 transition-transform duration-300"
-              onError={(e) => {
-                const target = e.currentTarget;
-                if (!target.src.includes('hero-logo.png')) {
-                  target.src = '/hero-logo.png';
-                }
-              }}
             />
 
             <div className="mt-1.5 space-y-1">

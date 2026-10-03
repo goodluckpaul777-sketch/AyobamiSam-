@@ -26,9 +26,7 @@ export const ImageCarousel: React.FC<ImageCarouselProps> = ({
   showBadge = true,
   className = '',
 }) => {
-  const safeImages = images && images.length > 0 && images.some(Boolean) 
-    ? images.filter(Boolean) 
-    : ['/hero-logo.png'];
+  const safeImages = images && images.length > 0 ? images : ['/IMG-20260927-WA0037.jpg'];
   const [currentIndex, setCurrentIndex] = useState(0);
   const [dragOffset, setDragOffset] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
@@ -180,12 +178,6 @@ export const ImageCarousel: React.FC<ImageCarouselProps> = ({
                   className="w-full h-full object-cover select-none pointer-events-none transition-transform duration-300"
                   loading={idx === 0 ? 'eager' : 'lazy'}
                   draggable={false}
-                  onError={(e) => {
-                    const target = e.currentTarget;
-                    if (!target.src.includes('hero-logo.png')) {
-                      target.src = '/hero-logo.png';
-                    }
-                  }}
                 />
               </div>
             );
@@ -313,12 +305,6 @@ export const ImageCarousel: React.FC<ImageCarouselProps> = ({
                   alt={`Thumbnail ${idx + 1}`}
                   className="w-full h-full object-cover"
                   loading="lazy"
-                  onError={(e) => {
-                    const target = e.currentTarget;
-                    if (!target.src.includes('hero-logo.png')) {
-                      target.src = '/hero-logo.png';
-                    }
-                  }}
                 />
               </button>
             ))}

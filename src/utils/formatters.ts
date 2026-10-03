@@ -79,26 +79,3 @@ I want to place an order.`;
 
   return `https://wa.me/${targetPhone}?text=${encodeURIComponent(text)}`;
 }
-
-/**
- * Safely opens a URL without triggering window.open security exceptions in sandboxed iframes
- */
-export function safeOpenUrl(url: string) {
-  if (typeof window === 'undefined' || !url) return;
-  try {
-    const a = document.createElement('a');
-    a.href = url;
-    a.target = '_blank';
-    a.rel = 'noopener noreferrer';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  } catch {
-    try {
-      window.open(url, '_blank', 'noopener,noreferrer');
-    } catch {
-      window.location.href = url;
-    }
-  }
-}
-

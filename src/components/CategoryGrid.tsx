@@ -3,8 +3,6 @@ import { MainSectionType } from '../types';
 import { MAIN_SECTIONS } from '../data/initialData';
 import { Shirt, Footprints, Scissors, ArrowRight, CheckCircle2 } from 'lucide-react';
 
-import { resolveProductImage } from '../utils/fabricImages';
-
 interface CategoryGridProps {
   selectedSection: 'all' | MainSectionType;
   onSelectSection: (section: MainSectionType) => void;
@@ -51,16 +49,9 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({
                 {/* Visual Header with Image */}
                 <div className="relative aspect-16/10 overflow-hidden bg-gray-100">
                   <img
-                    src={resolveProductImage(sec.image, sec.name, sec.id)}
+                    src={sec.image || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='}
                     alt={sec.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    onError={(e) => {
-                      const target = e.currentTarget;
-                      if (!target.src.includes('hero-logo.png')) {
-                        target.src = '/hero-logo.png';
-                        target.className = 'w-24 h-24 sm:w-32 sm:h-32 object-contain mx-auto my-auto p-4 opacity-40';
-                      }
-                    }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex items-end p-6">
                     <div className="text-white space-y-1">

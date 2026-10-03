@@ -41,12 +41,6 @@ export const Footer: React.FC<FooterProps> = ({
                   src={logoSrc}
                   alt="Ayobami SAM Ventures"
                   className="w-20 h-20 sm:w-24 sm:h-24 object-contain drop-shadow-xl hover:scale-105 transition-transform duration-300"
-                  onError={(e) => {
-                    const target = e.currentTarget;
-                    if (!target.src.includes('hero-logo.png')) {
-                      target.src = '/hero-logo.png';
-                    }
-                  }}
                 />
               )}
               <div>

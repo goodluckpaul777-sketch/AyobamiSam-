@@ -2,14 +2,11 @@ import React, { useState, useRef } from 'react';
 import { FabricProduct, StoreSettings, InquiryRecord, MainSectionType, SectionCategoryInfo } from '../types';
 import { MAIN_SECTIONS, OFFICIAL_LOGO_URL } from '../data/initialData';
 import { compressImage } from '../utils/imageCompressor';
-import { syncAllProductsToDatabase } from '../services/catalogService';
-import { safeOpenUrl } from '../utils/formatters';
 import { 
   Plus, Edit, Trash2, Package, Truck, Settings, ShoppingBag, 
   Check, RefreshCw, Upload, Star, ArrowLeft, ArrowRight, Image as ImageIcon, Eye,
   LogOut, Shield, Phone, MessageCircle, Layers, CheckCircle2, AlertCircle, Sparkles,
-  Search, Filter, ExternalLink, Scissors, Footprints, Shirt, Lock, EyeOff, KeyRound,
-  Download, UploadCloud
+  Search, Filter, ExternalLink, Scissors, Footprints, Shirt, Lock, EyeOff, KeyRound
 } from 'lucide-react';
 import { FacebookIcon, TikTokIcon } from './SocialIcons';
 
@@ -102,64 +99,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   const [isCreatingNew, setIsCreatingNew] = useState(false);
   const [saveSuccessMsg, setSaveSuccessMsg] = useState('');
   const [newImageUrl, setNewImageUrl] = useState('');
-  const [isSyncing, setIsSyncing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const backupFileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleSyncAllToCloud = async () => {
-    setIsSyncing(true);
-    try {
-      const count = await syncAllProductsToDatabase(products);
-      setSaveSuccessMsg(`Successfully pushed ${count} products & custom images to live cloud storage! Your hosted website on Vercel will now show these items.`);
-      setTimeout(() => setSaveSuccessMsg(''), 7000);
-    } catch (err) {
-      setSaveSuccessMsg('Error syncing to cloud: ' + String(err));
-      setTimeout(() => setSaveSuccessMsg(''), 6000);
-    } finally {
-      setIsSyncing(false);
-    }
-  };
-
-  const handleExportBackup = () => {
-    const jsonString = JSON.stringify(products, null, 2);
-    const blob = new Blob([jsonString], { type: 'application/json;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const downloadAnchor = document.createElement('a');
-    downloadAnchor.setAttribute('href', url);
-    downloadAnchor.setAttribute('download', `asv_catalog_backup_${new Date().toISOString().slice(0, 10)}.json`);
-    document.body.appendChild(downloadAnchor);
-    downloadAnchor.click();
-    document.body.removeChild(downloadAnchor);
-    URL.revokeObjectURL(url);
-  };
-
-  const handleImportBackup = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = async (event) => {
-      try {
-        const parsed = JSON.parse(event.target?.result as string);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          for (const item of parsed) {
-            onSaveProduct(item);
-          }
-          setSaveSuccessMsg(`Restored ${parsed.length} products from backup file!`);
-          setTimeout(() => setSaveSuccessMsg(''), 6000);
-        } else {
-          setSaveSuccessMsg('Invalid backup file format');
-          setTimeout(() => setSaveSuccessMsg(''), 6000);
-        }
-      } catch (err) {
-        setSaveSuccessMsg('Failed to read backup file: ' + String(err));
-        setTimeout(() => setSaveSuccessMsg(''), 6000);
-      }
-    };
-    reader.readAsText(file);
-    if (backupFileInputRef.current) {
-      backupFileInputRef.current.value = '';
-    }
-  };
 
   // Editable settings draft
   const [draftSettings, setDraftSettings] = useState<StoreSettings>(settings);
@@ -236,7 +176,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   const handleAddImageUrl = async () => {
     if (!newImageUrl.trim()) return;
     try {
-      const compressed = await compressImage(newImageUrl.trim(), 800, 0.75);
+      const compressed = await compressImage(newImageUrl.trim(), 1000, 0.82);
       const updated = [...currentGalleryImages, compressed];
       setProductForm({
         ...productForm,
@@ -261,7 +201,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
     for (const file of Array.from(files)) {
       try {
-        const compressed = await compressImage(file, 800, 0.75);
+        const compressed = await compressImage(file, 1000, 0.82);
         setProductForm((prev) => {
           const existing = prev.galleryImages || (prev.image ? [prev.image] : []);
           const updated = [...existing, compressed];
@@ -305,8 +245,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   const handleSaveProductSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!productForm.name?.trim()) {
-      setSaveSuccessMsg('Please enter a product name');
-      setTimeout(() => setSaveSuccessMsg(''), 4000);
+      alert('Please enter a product name');
       return;
     }
 
@@ -316,7 +255,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
     // Compress all images in gallery asynchronously
     const compressedGallery = await Promise.all(
-      rawGallery.map(img => compressImage(img, 800, 0.75))
+      rawGallery.map(img => compressImage(img, 1000, 0.82))
     );
 
     const autoGeneratedCode = productForm.productCode?.trim() || `019${String(products.length + 1).padStart(3, '0')}-1`;
@@ -331,7 +270,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
       availableStock: Number(productForm.availableStock) || 50,
       minimumOrder: Number(productForm.minimumOrder) || 1,
       unitLabel: '',
-      image: compressedGallery[0] || productForm.image || '/hero-logo.png',
+      image: compressedGallery[0] || productForm.image || '/IMG-20260927-WA0038.jpg',
       galleryImages: compressedGallery,
       colors: Array.isArray(productForm.colors) ? productForm.colors : ['Multi'],
       fabricType: '',
@@ -493,7 +432,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
           <div className="flex items-center gap-3">
             <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-950/80 text-emerald-300 border border-emerald-500/40">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              Live Cloud Sync
+              Live Firebase Cloud Sync
             </span>
             <button
               onClick={handleExitPortal}
@@ -655,7 +594,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                 <div className="bg-white p-6 rounded-2xl border-2 border-emerald-600/20 shadow-sm flex items-center justify-between">
                   <div>
                     <span className="text-xs font-black uppercase text-emerald-600 block tracking-wider">Cloud Database</span>
-                    <h3 className="text-2xl font-black text-emerald-900 mt-1">Database Connected</h3>
+                    <h3 className="text-2xl font-black text-emerald-900 mt-1">Firebase Live</h3>
                     <p className="text-xs text-gray-500 font-semibold mt-0.5">Real-time sync to all devices</p>
                   </div>
                   <div className="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-black">
@@ -675,68 +614,6 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                   </div>
                 </div>
 
-              </div>
-
-              {/* Cloud Synchronization & Catalog Backup Card */}
-              <div className="bg-gradient-to-r from-[#0F2E22] to-[#1B4332] text-white p-6 rounded-2xl border-2 border-[#D4AF37]/50 shadow-md space-y-4">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-black uppercase tracking-wider text-[#0F2E22] bg-[#D4AF37] px-2.5 py-0.5 rounded shadow-xs">
-                        Hosted Website (Vercel) Sync
-                      </span>
-                      <span className="text-xs text-emerald-300 font-semibold flex items-center gap-1">
-                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                        {products.length} Products in Store
-                      </span>
-                    </div>
-                    <h3 className="text-lg sm:text-xl font-black text-white mt-1">
-                      Publish & Sync All Products to Live Cloud
-                    </h3>
-                    <p className="text-xs text-[#E0D6C8] font-medium max-w-2xl leading-relaxed mt-0.5">
-                      Ensure all products, descriptions, and custom pictures you've added show on your live hosted Vercel website for all public visitors.
-                    </p>
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-3">
-                    <button
-                      type="button"
-                      onClick={handleSyncAllToCloud}
-                      disabled={isSyncing}
-                      className="px-5 py-3 rounded-xl bg-[#D4AF37] hover:bg-[#c49b29] text-[#0F2E22] font-black text-xs sm:text-sm flex items-center gap-2 shadow-lg transition-all cursor-pointer disabled:opacity-50"
-                    >
-                      <UploadCloud className={`w-5 h-5 ${isSyncing ? 'animate-spin' : ''}`} />
-                      <span>{isSyncing ? 'Syncing to Cloud...' : 'Push All Products to Cloud Now'}</span>
-                    </button>
-                    
-                    <button
-                      type="button"
-                      onClick={handleExportBackup}
-                      className="px-4 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs flex items-center gap-2 border border-white/20 transition-all cursor-pointer"
-                      title="Download a backup file with all products and images"
-                    >
-                      <Download className="w-4 h-4 text-[#D4AF37]" />
-                      <span>Backup JSON</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => backupFileInputRef.current?.click()}
-                      className="px-4 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs flex items-center gap-2 border border-white/20 transition-all cursor-pointer"
-                      title="Restore products from a previously downloaded backup file"
-                    >
-                      <Upload className="w-4 h-4 text-emerald-300" />
-                      <span>Restore JSON</span>
-                    </button>
-                    <input
-                      type="file"
-                      ref={backupFileInputRef}
-                      onChange={handleImportBackup}
-                      accept=".json"
-                      className="hidden"
-                    />
-                  </div>
-                </div>
               </div>
 
               {/* Quick Action Buttons */}
@@ -1154,24 +1031,15 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
                     {/* Actions & Search */}
                     <div className="flex items-center gap-3">
-                      <div className="flex items-center gap-1.5 relative w-full sm:w-60">
-                        <div className="relative flex-1">
-                          <input
-                            type="text"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            placeholder="Search items..."
-                            className="w-full pl-9 pr-3 py-2.5 rounded-xl border-2 border-gray-200 focus:border-[#0F2E22] text-xs font-semibold focus:outline-none"
-                          />
-                          <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                        </div>
-                        <button
-                          type="button"
-                          className="px-3.5 py-2.5 rounded-xl bg-[#0F2E22] text-[#D4AF37] border border-[#D4AF37]/40 text-xs font-black flex items-center gap-1 shrink-0 shadow-sm"
-                        >
-                          <Search className="w-4 h-4" />
-                          <span className="hidden md:inline">Search</span>
-                        </button>
+                      <div className="relative w-full sm:w-48">
+                        <input
+                          type="text"
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          placeholder="Search items..."
+                          className="w-full pl-8 pr-3 py-2 rounded-xl border border-gray-300 text-xs"
+                        />
+                        <Search className="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
                       </div>
 
                       <button
@@ -1355,7 +1223,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                               const rawPhone = inq.customer?.whatsapp || inq.customer?.phone || '';
                               const formattedPhone = formatPhoneForWhatsApp(rawPhone);
                               const text = `Hello ${inq.customer?.fullName || 'Customer'}, thank you for contacting ${settings.storeName || 'Ayobami SAM Ventures'} regarding your inquiry #${inq.inquiryNumber || inq.id}.`;
-                              safeOpenUrl(`https://wa.me/${formattedPhone}?text=${encodeURIComponent(text)}`);
+                              window.open(`https://wa.me/${formattedPhone}?text=${encodeURIComponent(text)}`, '_blank');
                             }}
                             className="px-4 py-2.5 rounded-xl bg-[#25D366] hover:bg-[#1EBE5D] text-white font-black text-xs flex items-center gap-2 shadow transition-transform hover:scale-105 cursor-pointer"
                           >
@@ -1627,7 +1495,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                 Are you sure you want to delete <span className="font-black text-gray-900">"{deleteConfirmProduct.name}"</span>?
               </p>
               <p className="text-[11px] text-red-600 font-bold mt-1">
-                This item will be permanently removed from your storefront and database.
+                This item will be permanently removed from your storefront and Firebase database.
               </p>
             </div>
             <div className="flex items-center gap-3 pt-2">
